@@ -39,7 +39,7 @@ impl Line {
 
 const H1: Style = Style::new()
     .fg(Color::Cyan)
-    .add_modifier(Modifier::BOLD | Modifier::UNDERLINED);
+    .add_modifier(Modifier::BOLD.union(Modifier::UNDERLINED));
 const H2: Style = Style::new().fg(Color::Cyan).add_modifier(Modifier::BOLD);
 const H3: Style = Style::new().fg(Color::Blue).add_modifier(Modifier::BOLD);
 const H4: Style = Style::new().fg(Color::Blue);
@@ -203,14 +203,14 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
             for (i, l) in rendered.into_iter().enumerate() {
                 if i == 0 {
                     let mut spans = vec![Span {
-                        content: marker,
+                        content: marker.clone(),
                         style: LIST_MARKER,
                     }];
                     spans.extend(l.spans);
                     out.push(Line { spans });
                 } else {
                     let mut spans = vec![Span::default_content(" ".repeat(
-                        marker.len(),
+                        marker.width(),
                     ))];
                     spans.extend(l.spans);
                     out.push(Line { spans });
@@ -539,7 +539,7 @@ fn render_table(header: &[String], rows: &[Vec<String>], width: usize) -> Vec<Li
     };
 
     out.push(sep('┌', '┬', '┐'));
-    let mut push_row = |cells: &[String], style: Style| {
+    let push_row = |out: &mut Vec<Line>, cells: &[String], style: Style| {
         let mut spans = vec![Span {
             content: "│ ".to_string(),
             style: TABLE_BORDER,
@@ -556,12 +556,11 @@ fn render_table(header: &[String], rows: &[Vec<String>], width: usize) -> Vec<Li
                 style: TABLE_BORDER,
             });
         }
-        out.push(Line { spans });
     };
-    push_row(header, TABLE_HEAD);
+    push_row(&mut out, header, TABLE_HEAD);
     out.push(sep('├', '┼', '┤'));
     for row in rows {
-        push_row(row, Style::default());
+        push_row(&mut out, row, Style::default());
     }
     out.push(sep('└', '┴', '┘'));
     out.push(Line::plain(""));
