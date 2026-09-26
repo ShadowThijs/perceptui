@@ -556,6 +556,7 @@ fn render_table(header: &[String], rows: &[Vec<String>], width: usize) -> Vec<Li
                 style: TABLE_BORDER,
             });
         }
+        out.push(Line { spans });
     };
     push_row(&mut out, header, TABLE_HEAD);
     out.push(sep('├', '┼', '┤'));
