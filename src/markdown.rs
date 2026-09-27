@@ -83,25 +83,30 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
         }
 
         if raw.trim().is_empty() {
-            out.push(Line::plain(""));
+            if out.last().map(|l| l.width() > 0).unwrap_or(false) {
+                out.push(blank());
+            }
             continue;
         }
 
-        // Headings.
+        // Headings: blank line before, blank line after (glow-style).
         if let Some(h) = trimmed.strip_prefix("# ") {
             out.push(blank());
             out.push(Line::styled(strip_inline(h), H1));
-            out.push(Line::styled("─".repeat(width.min(120)), RULE));
+            out.push(Line::styled("─".repeat(width.min(200)), RULE));
+            out.push(blank());
             continue;
         }
         if let Some(h) = trimmed.strip_prefix("## ") {
             out.push(blank());
             out.push(Line::styled(strip_inline(h), H2));
+            out.push(blank());
             continue;
         }
         if let Some(h) = trimmed.strip_prefix("### ") {
             out.push(blank());
             out.push(Line::styled(strip_inline(h), H3));
+            out.push(blank());
             continue;
         }
         for level in 4..=6 {
@@ -109,6 +114,7 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
             if let Some(h) = trimmed.strip_prefix(&prefix) {
                 out.push(blank());
                 out.push(Line::styled(strip_inline(h), H4));
+                out.push(blank());
                 break;
             }
         }
@@ -119,7 +125,8 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
         // Horizontal rule.
         if trimmed == "---" || trimmed == "***" || trimmed == "___" {
             out.push(blank());
-            out.push(Line::styled("─".repeat(width.min(120)), RULE));
+            out.push(Line::styled("─".repeat(width.min(200)), RULE));
+            out.push(blank());
             continue;
         }
 
@@ -164,6 +171,9 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
                 }
                 let _ = i;
                 rows.push(cells);
+            }
+            if out.last().map(|l| l.width() > 0).unwrap_or(false) {
+                out.push(blank());
             }
             out.extend(render_table(&header_cells, &rows, width));
             continue;
@@ -246,14 +256,27 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
         out.extend(render_code_block(&code_lang.unwrap_or_default(), &code_buf, width));
     }
 
-    // Trim leading/trailing blanks.
-    while out.first().map(|l| l.spans.is_empty() || l.width() == 0) == Some(true) {
-        out.remove(0);
+    // Collapse runs of blank lines to one; trim edges.
+    let mut collapsed: Vec<Line> = Vec::with_capacity(out.len());
+    for line in out {
+        let is_blank = line.width() == 0;
+        if is_blank
+            && collapsed
+                .last()
+                .map(|l: &Line| l.width() == 0)
+                .unwrap_or(is_blank)
+        {
+            continue;
+        }
+        collapsed.push(line);
     }
-    while out.last().map(|l| l.width() == 0) == Some(true) {
-        out.pop();
+    while collapsed.first().map(|l| l.width() == 0) == Some(true) {
+        collapsed.remove(0);
     }
-    out
+    while collapsed.last().map(|l| l.width() == 0) == Some(true) {
+        collapsed.pop();
+    }
+    collapsed
 }
 
 fn blank() -> Line {
@@ -441,59 +464,50 @@ fn find_close(chars: &[char], from: usize, open: char, close: char) -> Option<us
 
 fn render_code_block(lang: &str, code: &[String], width: usize) -> Vec<Line> {
     let mut out = Vec::new();
-    let inner = width.saturating_sub(4).max(20);
+    let max_len = code.iter().map(|l| l.width()).max().unwrap_or(0);
+    let inner = max_len.min(width.saturating_sub(4)).max(1);
     let border = Style::new().fg(Color::DarkGray);
-    let lang_disp = if lang.is_empty() { "text" } else { lang };
+
+    // Header: language label over an underline spanning the code width.
+    let rule_len = (inner + 4).min(width.saturating_sub(1));
     out.push(Line {
         spans: vec![
             Span {
-                content: format!("╭─ {lang_disp} ", ),
-                style: border,
+                content: "  ".to_string(),
+                style: Style::default(),
             },
             Span {
-                content: "─".repeat(inner.saturating_sub(lang_disp.len() + 4)),
-                style: border,
-            },
-            Span {
-                content: "╮".to_string(),
-                style: border,
+                content: lang.to_string(),
+                style: border.add_modifier(Modifier::BOLD),
             },
         ],
+    });
+    out.push(Line {
+        spans: vec![Span {
+            content: format!("  {}", "─".repeat(rule_len)),
+            style: border,
+        }],
     });
     for line in code {
         let truncated: String = line.chars().take(inner).collect();
         out.push(Line {
             spans: vec![
                 Span {
-                    content: "│ ".to_string(),
-                    style: border,
+                    content: "  ".to_string(),
+                    style: Style::default(),
                 },
                 Span {
                     content: truncated,
                     style: CODE_BLOCK,
                 },
-                Span {
-                    content: " │".to_string(),
-                    style: border,
-                },
             ],
         });
     }
     out.push(Line {
-        spans: vec![
-            Span {
-                content: "╰".to_string(),
-                style: border,
-            },
-            Span {
-                content: "─".repeat(inner + 2),
-                style: border,
-            },
-            Span {
-                content: "╯".to_string(),
-                style: border,
-            },
-        ],
+        spans: vec![Span {
+            content: format!("  {}", "─".repeat(rule_len)),
+            style: border,
+        }],
     });
     out.push(Line::plain(""));
     out

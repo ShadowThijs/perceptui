@@ -181,7 +181,7 @@ fn render_content(f: &mut Frame, app: &mut App, area: Rect) {
 }
 
 /// Split spans on case-insensitive matches of `q`, giving them a bg color.
-fn highlight_word(spans: &[RSpan], q: &str, bg: Color) -> Vec<RSpan> {
+fn highlight_word<'a>(spans: &[RSpan<'a>], q: &str, bg: Color) -> Vec<RSpan<'a>> {
     let mut out: Vec<RSpan> = Vec::new();
     for span in spans {
         let mut rest: &str = &span.content;
@@ -192,20 +192,19 @@ fn highlight_word(spans: &[RSpan], q: &str, bg: Color) -> Vec<RSpan> {
             let end = start + q.len();
             if start > consumed {
                 out.push(RSpan::styled(
-                    &rest[consumed..start],
+                    rest[consumed..start].to_string(),
                     span.style,
                 ));
             }
             out.push(RSpan::styled(
-                &rest[start..end],
+                rest[start..end].to_string(),
                 span.style.bg(bg),
             ));
             consumed = end;
         }
         if consumed < rest.len() {
-            out.push(RSpan::styled(&rest[consumed..], span.style));
+            out.push(RSpan::styled(rest[consumed..].to_string(), span.style));
         }
-        rest = &rest[consumed.min(rest.len())..];
         let _ = rest;
     }
     out
