@@ -49,7 +49,6 @@ const BOLD: Style = Style::new().add_modifier(Modifier::BOLD);
 const ITALIC: Style = Style::new().add_modifier(Modifier::ITALIC);
 const STRIKE: Style = Style::new().add_modifier(Modifier::CROSSED_OUT);
 const LINK: Style = Style::new().fg(Color::Yellow).add_modifier(Modifier::UNDERLINED);
-const QUOTE: Style = Style::new().fg(Color::DarkGray).add_modifier(Modifier::ITALIC);
 const RULE: Style = Style::new().fg(Color::DarkGray);
 const LIST_MARKER: Style = Style::new().fg(Color::LightBlue);
 const TABLE_BORDER: Style = Style::new().fg(Color::DarkGray);

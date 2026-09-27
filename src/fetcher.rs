@@ -14,11 +14,6 @@ pub enum SyncMsg {
     Failed(String),
 }
 
-pub async fn fetch(url: &str) -> Result<String> {
-    let body = reqwest::get(url).await?.error_for_status()?.text().await?;
-    Ok(body)
-}
-
 /// Download all pages for a source into the docs dir, returns fetched count.
 async fn download_all(
     client: &reqwest::Client,

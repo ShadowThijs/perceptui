@@ -40,7 +40,7 @@ fn render_tree(f: &mut Frame, app: &mut App, area: Rect) {
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(if focused { ACCENT } else { DIM }))
-        .title(Span::styled(
+        .title(RSpan::styled(
             format!(" {} ", app.active_source.title()),
             Style::default().fg(ACCENT).add_modifier(Modifier::BOLD),
         ))
@@ -102,7 +102,7 @@ fn render_content(f: &mut Frame, app: &mut App, area: Rect) {
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(if focused { ACCENT } else { DIM }))
-        .title(Span::styled(
+        .title(RSpan::styled(
             format!(" {title} "),
             Style::default().fg(ACCENT).add_modifier(Modifier::BOLD),
         ));
@@ -223,11 +223,11 @@ fn render_global_hits(f: &mut Frame, app: &mut App, area: Rect) {
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(ACCENT))
-        .title(Span::styled(
+        .title(RSpan::styled(
             format!(" docs search: {} ", app.search_input),
             Style::default().fg(ACCENT).add_modifier(Modifier::BOLD),
         ))
-        .title_bottom(Span::styled(" [j/k] move  [Enter] open  [Esc] close ", Style::default().fg(DIM)));
+        .title_bottom(RSpan::styled(" [j/k] move  [Enter] open  [Esc] close ", Style::default().fg(DIM)));
     let inner = block.inner(popup);
     f.render_widget(block, popup);
 

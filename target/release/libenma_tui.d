@@ -1,0 +1,1 @@
+/home/ubuntu/projects/enma-tui/target/release/libenma_tui.rlib: /home/ubuntu/projects/enma-tui/src/app.rs /home/ubuntu/projects/enma-tui/src/docs.rs /home/ubuntu/projects/enma-tui/src/events.rs /home/ubuntu/projects/enma-tui/src/fetcher.rs /home/ubuntu/projects/enma-tui/src/lib.rs /home/ubuntu/projects/enma-tui/src/markdown.rs /home/ubuntu/projects/enma-tui/src/ui.rs

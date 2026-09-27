@@ -30,9 +30,12 @@ pub fn handle_key(app: &mut App, key: KeyEvent) {
             KeyCode::Backspace => {
                 app.search_input.pop();
                 match app.search_mode {
-                    Some(SearchMode::TreeFilter) | Some(SearchMode::Global) => {
-                        app.run_global_search();
+                    Some(SearchMode::TreeFilter) => {
+                        if let Some(first) = app.filter_tree().first() {
+                            app.tree_cursor = *first;
+                        }
                     }
+                    Some(SearchMode::Global) => app.run_global_search(),
                     _ => {}
                 }
             }

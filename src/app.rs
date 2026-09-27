@@ -2,7 +2,6 @@ use crate::docs::{self, Index, PageEntry, Source};
 use crate::fetcher::{self, SyncMsg};
 use crate::markdown::{self, Line};
 use anyhow::Result;
-use std::collections::HashMap;
 use tokio::sync::mpsc;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -25,7 +24,6 @@ pub struct App {
     pub index: Option<Index>,
     pub focus: Focus,
     pub active_source: Source,
-    pub tree_roots: HashMap<Source, Vec<usize>>,
     pub expanded: std::collections::HashSet<String>,
     pub tree_cursor: usize,
     pub visible: Vec<VisibleNode>,
@@ -74,7 +72,6 @@ impl App {
             index,
             focus: Focus::Tree,
             active_source: Source::Enma,
-            tree_roots: HashMap::new(),
             expanded: std::collections::HashSet::new(),
             tree_cursor: 0,
             visible: Vec::new(),
