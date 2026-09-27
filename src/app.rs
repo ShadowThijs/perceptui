@@ -34,6 +34,7 @@ pub struct App {
     pub rendered: Vec<Line>,
     pub scroll: u16,
     pub content_width: u16,
+    pub last_render_width: u16,
 
     pub search_mode: Option<SearchMode>,
     pub search_input: String,
@@ -81,6 +82,7 @@ impl App {
             rendered: Vec::new(),
             scroll: 0,
             content_width: 80,
+            last_render_width: 0,
             search_mode: None,
             search_input: String::new(),
             global_hits: Vec::new(),
