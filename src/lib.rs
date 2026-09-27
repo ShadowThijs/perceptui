@@ -8,6 +8,11 @@ mod ui;
 use anyhow::Result;
 use tokio::sync::mpsc;
 
+/// Debug helper: render markdown and expose the result (examples/dbg.rs).
+pub fn debug_render(md: &str, width: usize) -> Vec<markdown::Line> {
+    markdown::render(md, width)
+}
+
 pub fn run() -> Result<()> {
     let rt = tokio::runtime::Runtime::new()?;
     let mut terminal = ratatui::init();

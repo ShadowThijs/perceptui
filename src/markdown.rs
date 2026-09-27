@@ -229,8 +229,8 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
         }
         let _ = list_depth;
 
-        // Paragraph text: gather consecutive plain lines into one paragraph.
-        let mut para = vec![strip_inline_raw(trimmed)];
+        // Paragraph: gather consecutive plain lines, render as one wrapped block.
+        let mut para = vec![trimmed];
         while let Some(next) = lines.peek() {
             let n = next.trim_start();
             if n.is_empty()
@@ -244,7 +244,7 @@ pub fn render(md: &str, width: usize) -> Vec<Line> {
             {
                 break;
             }
-            para.push(strip_inline_raw(n));
+            para.push(n);
             lines.next();
         }
         let joined = para.join(" ");
@@ -407,18 +407,18 @@ fn render_inline(s: &str) -> Line {
                 continue;
             }
         }
-        // Italic (single * or _).
-        if rest.starts_with('*') || (rest.starts_with('_') && !rest.starts_with("__")) {
-            let (delim, dlen): (char, usize) = if rest.starts_with('*') { ('*', 1) } else { ('_', 1) };
-            if let Some(end) = rest[dlen..].find(delim) {
-                let inner = &rest[dlen..dlen + end];
+        // Italic: single * only. Bare _ is skipped since identifiers like
+        // register_routine contain underscores; docs here rarely use _italic_.
+        if rest.starts_with('*') {
+            if let Some(end) = rest[1..].find('*') {
+                let inner = &rest[1..1 + end];
                 if !inner.is_empty() {
                     flush!();
                     spans.push(Span {
                         content: inner.to_string(),
                         style: ITALIC,
                     });
-                    i += dlen + end + dlen;
+                    i += 1 + end + 1;
                     continue;
                 }
             }
@@ -613,7 +613,7 @@ fn wrap_lines(line: &Line, width: usize) -> Vec<Line> {
             let mut v = Vec::new();
             for ch in span.content.chars() {
                 let sp = ch.is_whitespace();
-                if sp == is_space && !word.is_empty() {
+                if !word.is_empty() && sp != is_space {
                     v.push((std::mem::take(&mut word), is_space));
                 }
                 is_space = sp;
