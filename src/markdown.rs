@@ -303,10 +303,6 @@ fn strip_inline(s: &str) -> String {
         .collect()
 }
 
-fn strip_inline_raw(s: &str) -> String {
-    strip_inline(s)
-}
-
 /// Inline markdown -> single styled Line (no wrapping).
 fn render_inline(s: &str) -> Line {
     let mut spans: Vec<Span> = Vec::new();
@@ -590,7 +586,7 @@ fn wrap_lines(line: &Line, width: usize) -> Vec<Line> {
     let mut cur: Vec<Span> = Vec::new();
     let mut cur_w = 0usize;
 
-    let mut push_word = |cur: &mut Vec<Span>, cw: &mut usize, result: &mut Vec<Line>, word: &str, style: Style| {
+    let push_word = |cur: &mut Vec<Span>, cw: &mut usize, result: &mut Vec<Line>, word: &str, style: Style| {
         let ww = UnicodeWidthStr::width(word);
         if *cw + ww > width && *cw > 0 {
             result.push(Line {

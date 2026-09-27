@@ -379,15 +379,29 @@ fn folder_title(title: &str) -> String {
     title.trim_end_matches('▸').trim_end_matches('▾').trim().to_string()
 }
 
+/// Byte-index snapping to char boundaries; stable stand-ins for the
+/// unstable `floor_char_boundary`/`ceil_char_boundary` (Rust <1.87).
+fn floor_boundary(s: &str, mut i: usize) -> usize {
+    while i > 0 && !s.is_char_boundary(i) {
+        i -= 1;
+    }
+    i
+}
+
+fn ceil_boundary(s: &str, mut i: usize) -> usize {
+    while i < s.len() && !s.is_char_boundary(i) {
+        i += 1;
+    }
+    i
+}
+
 fn truncate_excerpt(line: &str, q: &str) -> String {
     let lower = line.to_lowercase();
     let Some(pos) = lower.find(&q.to_lowercase()) else {
         return line.chars().take(80).collect();
     };
-    let start = lower
-        .floor_char_boundary(pos.saturating_sub(30))
-        .min(pos);
-    let end = lower.ceil_char_boundary((pos + q.len() + 50).min(line.len()));
+    let start = floor_boundary(&lower, pos.saturating_sub(30)).min(pos);
+    let end = ceil_boundary(&lower, (pos + q.len() + 50).min(line.len()));
     let mut s = line[start..end].trim().to_string();
     if start > 0 {
         s = format!("…{s}");

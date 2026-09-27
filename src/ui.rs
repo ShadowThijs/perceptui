@@ -184,7 +184,7 @@ fn render_content(f: &mut Frame, app: &mut App, area: Rect) {
 fn highlight_word<'a>(spans: &[RSpan<'a>], q: &str, bg: Color) -> Vec<RSpan<'a>> {
     let mut out: Vec<RSpan> = Vec::new();
     for span in spans {
-        let mut rest: &str = &span.content;
+        let rest: &str = &span.content;
         let lower = rest.to_lowercase();
         let mut consumed = 0usize;
         while let Some(pos) = lower[consumed..].find(q) {

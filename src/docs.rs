@@ -55,7 +55,8 @@ impl PageEntry {
 }
 
 pub fn docs_root() -> PathBuf {
-    PathBuf::from("/tmp/enma-docs")
+    // /tmp/enma-docs on Linux, %TEMP%\enma-docs on Windows.
+    std::env::temp_dir().join("enma-docs")
 }
 
 pub fn source_dir(source: Source) -> PathBuf {
