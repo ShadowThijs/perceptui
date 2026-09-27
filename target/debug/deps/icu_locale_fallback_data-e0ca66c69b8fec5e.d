@@ -1,8 +1,0 @@
-/home/ubuntu/projects/enma-tui/target/debug/deps/icu_locale_fallback_data-e0ca66c69b8fec5e.d: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/mod.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/locale_likely_subtags_language_v1.rs.data /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/locale_parents_v1.rs.data
-
-/home/ubuntu/projects/enma-tui/target/debug/deps/libicu_locale_fallback_data-e0ca66c69b8fec5e.rmeta: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/mod.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/locale_likely_subtags_language_v1.rs.data /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/locale_parents_v1.rs.data
-
-/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/lib.rs:
-/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/mod.rs:
-/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/locale_likely_subtags_language_v1.rs.data:
-/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/icu_locale_fallback_data-2.3.0/src/../data/locale_parents_v1.rs.data:
