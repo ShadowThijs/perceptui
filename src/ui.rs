@@ -10,20 +10,36 @@ const ACCENT: Color = Color::Cyan;
 const DIM: Color = Color::DarkGray;
 
 pub fn render(f: &mut Frame, app: &mut App) {
-    let [tree, content] = Layout::horizontal([
-        Constraint::Percentage(28),
-        Constraint::Percentage(72),
+    // Status line at the bottom, content above.
+    let [body, _status] = Layout::vertical([
+        Constraint::Min(1),
+        Constraint::Length(1),
     ])
     .areas(f.area());
 
-    app.content_width = content.width.saturating_sub(2).max(20);
-    if app.last_render_width != app.content_width {
-        app.last_render_width = app.content_width;
-        app.rerender();
-    }
+    if app.tree_visible {
+        let [tree, content] = Layout::horizontal([
+            Constraint::Percentage(20),
+            Constraint::Percentage(80),
+        ])
+        .areas(body);
 
-    render_tree(f, app, tree);
-    render_content(f, app, content);
+        app.content_width = content.width.saturating_sub(4).max(20);
+        if app.last_render_width != app.content_width {
+            app.last_render_width = app.content_width;
+            app.rerender();
+        }
+
+        render_tree(f, app, tree);
+        render_content(f, app, content);
+    } else {
+        app.content_width = body.width.saturating_sub(4).max(20);
+        if app.last_render_width != app.content_width {
+            app.last_render_width = app.content_width;
+            app.rerender();
+        }
+        render_content(f, app, body);
+    }
     render_status(f, app, f.area());
 
     // Overlays.
@@ -116,7 +132,6 @@ fn render_content(f: &mut Frame, app: &mut App, area: Rect) {
     }
     let start = app.scroll as usize;
 
-    let mut doc_hit_idx = 0usize;
     let lines: Vec<RLine> = app
         .rendered
         .iter()
@@ -129,17 +144,16 @@ fn render_content(f: &mut Frame, app: &mut App, area: Rect) {
                 .iter()
                 .map(|s| RSpan::styled(s.content.clone(), s.style))
                 .collect();
-            // Highlight in-document search hit line.
-            if doc_hit_idx < app.doc_hits.len() && app.doc_hits[doc_hit_idx] == i {
-                doc_hit_idx += 1;
-                if Some(doc_hit_idx - 1) == Some(app.doc_hit_cursor) {
-                    for s in &mut spans {
-                        s.style = s.style.bg(Color::Rgb(90, 90, 40));
-                    }
-                } else {
-                    for s in &mut spans {
-                        s.style = s.style.bg(Color::Rgb(50, 50, 30));
-                    }
+            // Highlight in-page search: dim for hits, bright bg for current.
+            if !app.doc_query.is_empty() {
+                let q = app.doc_query.to_lowercase();
+                let is_hit = app.doc_hits.contains(&i);
+                let is_current = is_hit
+                    && app.doc_hits.get(app.doc_hit_cursor) == Some(&i);
+                if is_current {
+                    spans = highlight_word(&spans, &q, Color::Rgb(120, 100, 0));
+                } else if is_hit {
+                    spans = highlight_word(&spans, &q, Color::Rgb(60, 55, 20));
                 }
             }
             RLine::from(spans)
@@ -166,6 +180,37 @@ fn render_content(f: &mut Frame, app: &mut App, area: Rect) {
     }
 }
 
+/// Split spans on case-insensitive matches of `q`, giving them a bg color.
+fn highlight_word(spans: &[RSpan], q: &str, bg: Color) -> Vec<RSpan> {
+    let mut out: Vec<RSpan> = Vec::new();
+    for span in spans {
+        let mut rest: &str = &span.content;
+        let lower = rest.to_lowercase();
+        let mut consumed = 0usize;
+        while let Some(pos) = lower[consumed..].find(q) {
+            let start = consumed + pos;
+            let end = start + q.len();
+            if start > consumed {
+                out.push(RSpan::styled(
+                    &rest[consumed..start],
+                    span.style,
+                ));
+            }
+            out.push(RSpan::styled(
+                &rest[start..end],
+                span.style.bg(bg),
+            ));
+            consumed = end;
+        }
+        if consumed < rest.len() {
+            out.push(RSpan::styled(&rest[consumed..], span.style));
+        }
+        rest = &rest[consumed.min(rest.len())..];
+        let _ = rest;
+    }
+    out
+}
+
 fn render_status(f: &mut Frame, app: &App, area: Rect) {
     let sync = if app.syncing {
         app.sync_status.clone()
@@ -184,10 +229,10 @@ fn render_status(f: &mut Frame, app: &App, area: Rect) {
     };
     let line = RLine::from(vec![
         RSpan::styled(" [Tab] source ", Style::default().fg(DIM)),
-        RSpan::styled(" [/] filter ", Style::default().fg(DIM)),
+        RSpan::styled(" [/] search ", Style::default().fg(DIM)),
         RSpan::styled(" [f] find ", Style::default().fg(DIM)),
-        RSpan::styled(" [*] doc search ", Style::default().fg(DIM)),
-        RSpan::styled(" [w] focus ", Style::default().fg(DIM)),
+        RSpan::styled(" [^n] tree ", Style::default().fg(DIM)),
+        RSpan::styled(" [^h/l] focus ", Style::default().fg(DIM)),
         RSpan::styled(" [q] quit ", Style::default().fg(DIM)),
         RSpan::styled(format!("│ {sync} │ {page_info}{hits}"), Style::default().fg(DIM)),
     ]);
