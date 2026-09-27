@@ -45,6 +45,10 @@ pub struct App {
     pub sync_status: String,
     pub syncing: bool,
     pub quit: bool,
+    /// Sidebar collapsed (ctrl+n).
+    pub tree_visible: bool,
+    /// Last in-page search query (for word highlighting).
+    pub doc_query: String,
 }
 
 /// Flat tree node for rendering.
@@ -90,6 +94,8 @@ impl App {
             sync_status: "syncing…".into(),
             syncing: true,
             quit: false,
+            tree_visible: true,
+            doc_query: String::new(),
         };
         app.rebuild_tree();
         if app.open_page.is_none() {
@@ -249,6 +255,17 @@ impl App {
         }
     }
 
+    /// Open the page under the cursor without moving focus (live filter).
+    pub fn preview_cursor_page(&mut self) {
+        let Some(node) = self.visible.get(self.tree_cursor) else {
+            return;
+        };
+        if let Some(page) = node.page.clone() {
+            self.active_source = node.source;
+            self.open(page);
+        }
+    }
+
     /// Filtered visible nodes for the tree prompt.
     pub fn filter_tree(&self) -> Vec<usize> {
         if self.search_mode != Some(SearchMode::TreeFilter) || self.search_input.is_empty() {
@@ -304,6 +321,7 @@ impl App {
         let q = self.search_input.to_lowercase();
         self.doc_hits.clear();
         self.doc_hit_cursor = 0;
+        self.doc_query = self.search_input.clone();
         if q.is_empty() {
             return;
         }
