@@ -104,14 +104,15 @@ impl App {
         Ok(app)
     }
 
-    /// Load index from disk if we did not have one yet (after first sync).
-    pub fn reload_index_if_needed(&mut self) {
-        if self.index.is_none() {
-            if let Ok(idx) = docs::load_index() {
-                self.index = Some(idx);
-                self.rebuild_tree();
-                self.open_first_page();
-            }
+    /// Reload index from disk after a sync completes and refresh the tree.
+    /// Keeps the open page and scroll position; opens the first page only
+    /// when nothing is open yet.
+    pub fn reload_index(&mut self) {
+        let Ok(idx) = docs::load_index() else { return };
+        self.index = Some(idx);
+        self.rebuild_tree();
+        if self.open_page.is_none() {
+            self.open_first_page();
         }
     }
 

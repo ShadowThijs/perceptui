@@ -67,10 +67,11 @@ async fn async_main(terminal: &mut ratatui::DefaultTerminal) -> Result<()> {
                     None => return Ok(()),
                 }
             }
-            msg = app.sync_rx.recv() => {
-                if let Some(msg) = msg {
-                    apply_sync_msg(&mut app, msg);
-                }
+            // Pattern-match Some so a closed channel (worker finished and
+            // dropped its sender) disables this branch instead of resolving
+            // instantly with None, which would spin the loop redrawing.
+            Some(msg) = app.sync_rx.recv() => {
+                apply_sync_msg(&mut app, msg);
             }
         }
     }
@@ -87,7 +88,7 @@ fn apply_sync_msg(app: &mut app::App, msg: fetcher::SyncMsg) {
         fetcher::SyncMsg::Done { updated } => {
             app.syncing = false;
             app.sync_status = format!("{updated} pages updated");
-            app.reload_index_if_needed();
+            app.reload_index();
             app.rerender();
         }
         fetcher::SyncMsg::Failed(e) => {

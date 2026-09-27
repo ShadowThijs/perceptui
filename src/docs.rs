@@ -112,6 +112,10 @@ pub fn parse_manifest(source: Source, llms: &str) -> Vec<PageEntry> {
         if url.ends_with("llms.txt") {
             continue;
         }
+        // Outdated subsections of a source are never fetched.
+        if is_excluded(source, &url) {
+            continue;
+        }
         pages.push(PageEntry {
             title: title.trim().to_string(),
             url: url.to_string(),
@@ -120,8 +124,22 @@ pub fn parse_manifest(source: Source, llms: &str) -> Vec<PageEntry> {
     // Dedup by url, keep first.
     let mut seen = std::collections::HashSet::new();
     pages.retain(|p| seen.insert(p.url.clone()));
-    let _ = source;
     pages
+}
+
+/// Perception subsections that contain outdated information; never fetched.
+const PERCEPTION_EXCLUDED: &[&str] = &[
+    "perception/angel-script/",
+    "perception/lua-script/",
+    "perception/docs/",
+    "perception/perception-ide/",
+];
+
+fn is_excluded(source: Source, url: &str) -> bool {
+    match source {
+        Source::Enma => false,
+        Source::Perception => PERCEPTION_EXCLUDED.iter().any(|p| url.contains(p)),
+    }
 }
 
 pub fn load_index() -> Result<Index> {
